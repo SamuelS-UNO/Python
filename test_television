@@ -1,0 +1,151 @@
+import pytest
+from television import Television
+
+
+def test_init_uses_defaults():
+    tv = Television()
+    expected = f"Power = False, Channel = {Television.MIN_CHANNEL}, Volume = {Television.MIN_VOLUME}"
+    assert str(tv) == expected
+
+
+def test_power_on_and_off():
+    tv = Television()
+
+    assert str(tv) == f"Power = False, Channel = {Television.MIN_CHANNEL}, Volume = {Television.MIN_VOLUME}"
+
+    tv.power()
+    assert str(tv) == f"Power = True, Channel = {Television.MIN_CHANNEL}, Volume = {Television.MIN_VOLUME}"
+
+    tv.power()
+    assert str(tv) == f"Power = False, Channel = {Television.MIN_CHANNEL}, Volume = {Television.MIN_VOLUME}"
+
+
+def test_mute_when_on_with_volume_increase():
+    tv = Television()
+    tv.power()
+    tv.volume_up()
+    tv.mute()
+
+    assert str(tv) == f"Power = True, Channel = {Television.MIN_CHANNEL}, Volume = 0"
+
+
+def test_unmute_when_on():
+    tv = Television()
+    tv.power()
+    tv.volume_up()
+    tv.mute()
+    tv.mute()
+
+    assert str(tv) == f"Power = True, Channel = {Television.MIN_CHANNEL}, Volume = 1"
+
+
+def test_tv_off_with_muted_and_unmuted():
+    tv1 = Television()
+    assert str(tv1) == f"Power = False, Channel = {Television.MIN_CHANNEL}, Volume = {Television.MIN_VOLUME}"
+
+    tv2 = Television()
+    tv2.power()
+    tv2.volume_up()
+    tv2.mute()
+    tv2.power()
+
+    assert str(tv2) == f"Power = False, Channel = {Television.MIN_CHANNEL}, Volume = 0"
+
+
+def test_channel_up_when_off():
+    tv = Television()
+    tv.channel_up()
+    assert str(tv) == f"Power = False, Channel = {Television.MIN_CHANNEL}, Volume = {Television.MIN_VOLUME}"
+
+
+def test_channel_up_while_on():
+    tv = Television()
+    tv.power()
+    tv.channel_up()
+    assert str(tv) == f"Power = True, Channel = {Television.MIN_CHANNEL + 1}, Volume = {Television.MIN_VOLUME}"
+
+
+def test_channel_up_max():
+    tv = Television()
+    tv.power()
+
+    for _ in range(Television.MAX_CHANNEL - Television.MIN_CHANNEL):
+        tv.channel_up()
+    assert "Channel = " + str(Television.MAX_CHANNEL) in str(tv)
+
+    tv.channel_up()
+    assert f"Channel = {Television.MIN_CHANNEL}" in str(tv)
+
+
+def test_channel_down_while_off():
+    tv = Television()
+    tv.channel_down()
+    assert str(tv) == f"Power = False, Channel = {Television.MIN_CHANNEL}, Volume = {Television.MIN_VOLUME}"
+
+
+def test_channel_down_min():
+    tv = Television()
+    tv.power()
+
+    tv.channel_down()
+    assert f"Channel = {Television.MAX_CHANNEL}" in str(tv)
+
+
+def test_volume_up_while_off():
+    tv = Television()
+    tv.volume_up()
+    assert str(tv) == f"Power = False, Channel = {Television.MIN_CHANNEL}, Volume = {Television.MIN_VOLUME}"
+
+
+def test_volume_up_while_on():
+    tv = Television()
+    tv.power()
+    tv.volume_up()
+    assert str(tv) == f"Power = True, Channel = {Television.MIN_CHANNEL}, Volume = {Television.MIN_VOLUME + 1}"
+
+
+def test_volume_up_while_muted_and_unmuted():
+    tv = Television()
+    tv.power()
+    tv.volume_up()
+    tv.mute()
+    tv.volume_up()
+
+    assert str(tv) == f"Power = True, Channel = {Television.MIN_CHANNEL}, Volume = {Television.MAX_VOLUME}"
+
+
+def test_volume_up_max():
+    tv = Television()
+    tv.power()
+    for _ in range(5):
+        tv.volume_up()
+
+    assert str(tv) == f"Power = True, Channel = {Television.MIN_CHANNEL}, Volume = {Television.MAX_VOLUME}"
+
+
+def test_volume_down_while_off():
+    tv = Television()
+    tv.volume_down()
+    assert str(tv) == f"Power = False, Channel = {Television.MIN_CHANNEL}, Volume = {Television.MIN_VOLUME}"
+
+
+def test_volume_down_while_on():
+    tv = Television()
+    tv.power()
+    tv.volume_up()
+    tv.volume_up()
+    tv.volume_down()
+
+    assert str(tv) == f"Power = True, Channel = {Television.MIN_CHANNEL}, Volume = {Television.MAX_VOLUME - 1}"
+
+
+def test_volume_down_while_muted_and_unmuted():
+    tv = Television()
+    tv.power()
+    tv.volume_up()
+    tv.volume_up()
+    tv.mute()
+    tv.volume_down()
+
+    assert str(tv) == f"Power = True, Channel = {Television.MIN_CHANNEL}, Volume = {Television.MAX_VOLUME - 1}"
+
